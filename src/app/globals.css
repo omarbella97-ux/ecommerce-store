@@ -1,0 +1,785 @@
+@import "tailwindcss";
+
+/* ==========================================================================
+   Design system
+   Monochrome, image-led, square-edged, edge-to-edge. One sans family for
+   everything: small bold uppercase headings with tight tracking, light
+   weights for large display text. Tokens live in @theme so they generate
+   Tailwind utilities; composite patterns live in @utility below.
+   ========================================================================== */
+
+/* Responsive values that change per breakpoint (md = 48rem, xl = 80rem). */
+:root {
+  --gutter: 1rem;
+  --header-height: 4rem;
+  --grid-gap-x: 1px; /* product tiles are separated by a 1px canvas seam */
+  --grid-gap-y: 1px;
+  --announcement-height: 2.5rem;
+}
+
+@media (width >= 48rem) {
+  :root {
+    --gutter: 1.5rem;
+    --header-height: 4.5rem;
+  }
+}
+
+@media (width >= 80rem) {
+  :root {
+    --gutter: 2rem;
+  }
+}
+
+@theme {
+  /* Color — the palette is closed: Tailwind's default colors are removed so
+     only these tokens exist (bg-ink, text-muted, border-line, …). */
+  --color-*: initial;
+  --color-white: #ffffff;
+  --color-black: #000000;
+  --color-canvas: #ffffff; /* page background */
+  --color-ink: #000000; /* primary text, primary buttons, strong borders */
+  --color-ink-soft: #333333; /* hover state of ink fills */
+  --color-muted: #555555; /* secondary text (7.5:1 on canvas) */
+  --color-subtle: #767676; /* placeholders, meta — the lightest AA-safe grey */
+  --color-surface: #fafafa; /* product tiles — barely off-white */
+  --color-surface-strong: #f0f0f0; /* image placeholders, quiet panels */
+  --color-line: rgb(0 0 0 / 0.15); /* hairline dividers, inputs */
+  --color-line-strong: #000000;
+  --color-line-inverse: rgb(255 255 255 / 0.5); /* hairlines over imagery */
+  --color-sale: #b3261e; /* reduced prices, errors — the only hue */
+  --color-success: #2e6b3f;
+
+  /* Type scale — UI text is deliberately small; display sizes are fluid. */
+  --text-micro: 0.6875rem;
+  --text-micro--line-height: 1rem;
+  --text-caption: 0.75rem;
+  --text-caption--line-height: 1rem;
+  --text-body: 0.875rem;
+  --text-body--line-height: 1.25rem;
+  --text-lead: 1rem;
+  --text-lead--line-height: 1.5rem;
+  --text-title: clamp(0.875rem, 0.8rem + 0.25vw, 1rem);
+  --text-title--line-height: 1.5rem;
+  --text-display-sm: clamp(1.5rem, 1.25rem + 1vw, 2rem);
+  --text-display-sm--line-height: 1.2;
+  --text-display-md: clamp(1.75rem, 1.25rem + 2vw, 3rem);
+  --text-display-md--line-height: 1.1;
+  --text-display-lg: clamp(2.25rem, 1.5rem + 3vw, 4.5rem);
+  --text-display-lg--line-height: 1.05;
+  --text-display-xl: clamp(2.75rem, 1.5rem + 5vw, 6.5rem);
+  --text-display-xl--line-height: 1;
+
+  /* Tracking is tight, never wide — including on uppercase labels. */
+  --tracking-tight: -0.03em;
+  --tracking-tighter: -0.04em;
+
+  /* Shape — square everywhere; only pills/dots may be round. */
+  --radius-*: initial;
+  --radius-none: 0;
+  --radius-full: 9999px;
+
+  /* Layout widths */
+  --container-page: 90rem;
+  --container-prose: 40rem;
+
+  /* Motion — quiet and short. */
+  --ease-standard: cubic-bezier(0.2, 0, 0, 1);
+  --default-transition-duration: 200ms;
+  --default-transition-timing-function: cubic-bezier(0.2, 0, 0, 1);
+}
+
+@theme inline {
+  --font-sans: var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif;
+
+  /* Responsive spacing: px-gutter, h-header, h-announcement, gap-x-tile, gap-y-tile-row */
+  --spacing-gutter: var(--gutter);
+  --spacing-header: var(--header-height);
+  --spacing-tile: var(--grid-gap-x);
+  --spacing-tile-row: var(--grid-gap-y);
+  --spacing-announcement: var(--announcement-height);
+}
+
+/* ==========================================================================
+   Base
+   ========================================================================== */
+
+@layer base {
+  html {
+    -webkit-text-size-adjust: 100%;
+    text-rendering: optimizeLegibility;
+  }
+
+  body {
+    background-color: var(--color-canvas);
+    color: var(--color-ink);
+    font-family: var(--font-sans);
+    font-size: var(--text-body);
+    line-height: var(--text-body--line-height);
+  }
+
+  /* A bare `border` is a hairline, not currentColor. */
+  *,
+  ::before,
+  ::after {
+    border-color: var(--color-line);
+  }
+
+  ::selection {
+    background-color: var(--color-ink);
+    color: var(--color-white);
+  }
+
+  :focus-visible {
+    outline: 1px solid currentColor;
+    outline-offset: 2px;
+  }
+
+  hr {
+    border-top: 1px solid var(--color-line);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+      transition-duration: 0.01ms !important;
+      animation-duration: 0.01ms !important;
+    }
+  }
+}
+
+/* ==========================================================================
+   Layout primitives
+   ========================================================================== */
+
+/* Centered page column with responsive side gutters. */
+@utility container-page {
+  width: 100%;
+  max-width: var(--container-page);
+  margin-inline: auto;
+  padding-inline: var(--gutter);
+}
+
+/* Full width with gutters only — for wide editorial rows and toolbars. */
+@utility container-bleed {
+  width: 100%;
+  padding-inline: var(--gutter);
+}
+
+/* Readable measure for long-form copy. */
+@utility container-prose {
+  width: 100%;
+  max-width: var(--container-prose);
+  margin-inline: auto;
+  padding-inline: var(--gutter);
+}
+
+/* Vertical rhythm between page sections. */
+@utility section {
+  padding-block: clamp(3rem, 2rem + 4vw, 6rem);
+}
+
+@utility section-tight {
+  padding-block: clamp(1.5rem, 1rem + 2vw, 3rem);
+}
+
+/* Thin black strip above the header for a single short message. */
+@utility announcement-bar {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: var(--announcement-height);
+  padding-inline: var(--gutter);
+  background-color: var(--color-ink);
+  color: var(--color-white);
+  font-size: var(--text-caption);
+  line-height: var(--text-caption--line-height);
+  font-weight: 500;
+  letter-spacing: var(--tracking-tight);
+}
+
+/* Header: search | wordmark | actions. Solid and sticky by default.
+   data-state="overlay": transparent and white over the first full-bleed
+     image. It stays in flow (so it sits below an announcement-bar) and a
+     negative margin pulls the next element up underneath it.
+   data-state="pinned": solid, fixed to the viewport top (after scrolling).
+     Both states take up no height, so switching causes no jump.
+   (States are attribute selectors, not separate utilities, so they always
+   override the base regardless of Tailwind's utility ordering.) */
+@utility header-bar {
+  position: sticky;
+  top: 0;
+  z-index: 40;
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  align-items: center;
+  height: var(--header-height);
+  padding-inline: var(--gutter);
+  background-color: var(--color-canvas);
+  color: var(--color-ink);
+  border-bottom: 1px solid var(--color-line);
+  transition-property: background-color, color, border-color;
+  transition-duration: 200ms;
+  transition-timing-function: var(--ease-standard);
+
+  &[data-state="overlay"] {
+    position: relative;
+    margin-bottom: calc(-1 * var(--header-height));
+    background-color: transparent;
+    color: var(--color-white);
+    border-bottom-color: var(--color-line-inverse);
+  }
+
+  &[data-state="pinned"] {
+    position: fixed;
+    inset-inline: 0;
+    top: 0;
+  }
+}
+
+/* Product listing: edge-to-edge product-tile cards, 2 → 3 → 4 columns,
+   separated by 1px seams of canvas showing between the tinted tiles. */
+@utility grid-products {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  column-gap: var(--grid-gap-x);
+  row-gap: var(--grid-gap-y);
+
+  @media (width >= 48rem) {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  @media (width >= 80rem) {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+}
+
+/* Editorial pair: stacked on mobile, two full-bleed halves from md. */
+@utility grid-split {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+
+  @media (width >= 48rem) {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+/* 12-column editorial grid sharing the page gutter. */
+@utility grid-layout {
+  display: grid;
+  grid-template-columns: repeat(12, minmax(0, 1fr));
+  column-gap: var(--gutter);
+}
+
+/* Hairline rule between blocks. */
+@utility divider {
+  border-top: 1px solid var(--color-line);
+}
+
+/* Listing toolbar: result count/sort on the left, filter control on the
+   right, hairline beneath. */
+@utility toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  min-height: 3rem;
+  padding-inline: var(--gutter);
+  border-bottom: 1px solid var(--color-line);
+  font-size: var(--text-caption);
+  line-height: var(--text-caption--line-height);
+  letter-spacing: var(--tracking-tight);
+}
+
+/* Horizontally scrolling row (category tabs, chips) with the scrollbar
+   hidden; children never wrap. */
+@utility scroller-x {
+  display: flex;
+  gap: 1.5rem;
+  overflow-x: auto;
+  overscroll-behavior-x: contain;
+  scrollbar-width: none;
+  white-space: nowrap;
+
+  &::-webkit-scrollbar {
+    display: none;
+  }
+
+  & > * {
+    flex: none;
+  }
+}
+
+/* ==========================================================================
+   Product tile — a tinted card holding eyebrow, packshot and meta.
+   <article class="product-tile">
+     <p class="product-eyebrow">…</p>
+     <div class="media-product"><Image fill …/></div>
+     <div class="product-meta"><h3>…</h3><p>…</p></div>
+   </article>
+   ========================================================================== */
+
+@utility product-tile {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  padding: 0.75rem;
+  background-color: var(--color-surface);
+}
+
+/* Small tag in the tile's top-left corner (new, exclusive, …). */
+@utility product-eyebrow {
+  min-height: var(--text-micro--line-height);
+  font-size: var(--text-micro);
+  line-height: var(--text-micro--line-height);
+  font-weight: 500;
+  letter-spacing: var(--tracking-tight);
+}
+
+/* ==========================================================================
+   Media primitives — never rounded. Product packshots are contained
+   (whole object visible on the tile tint); campaign imagery is cropped.
+   ========================================================================== */
+
+/* Square packshot, contained and centred; pair with next/image fill. */
+@utility media-product {
+  position: relative;
+  aspect-ratio: 1 / 1;
+  margin-block: 1.5rem;
+
+  & img {
+    object-fit: contain;
+  }
+
+  /* Lifestyle/stock photos with their own background fill the frame. */
+  &[data-fit="cover"] img {
+    object-fit: cover;
+  }
+}
+
+/* Category banner: full-bleed 4:5 on mobile, 2:1 from md, with the title
+   overlaid bottom-left (pair with scrim). */
+@utility media-banner {
+  position: relative;
+  overflow: hidden;
+  width: 100%;
+  aspect-ratio: 4 / 5;
+  background-color: var(--color-surface-strong);
+
+  & img {
+    object-fit: cover;
+  }
+
+  @media (width >= 48rem) {
+    aspect-ratio: 2 / 1;
+  }
+}
+
+/* Editorial/campaign image inside grid-split: 3:4 at every size. */
+@utility media-editorial {
+  position: relative;
+  overflow: hidden;
+  aspect-ratio: 3 / 4;
+  background-color: var(--color-surface-strong);
+
+  & img {
+    object-fit: cover;
+  }
+}
+
+/* Full-bleed hero: 2:3 portrait on mobile, 16:9 from md; never taller
+   than the viewport. Sits under header-overlay. */
+@utility media-hero {
+  position: relative;
+  overflow: hidden;
+  width: 100%;
+  height: min(100svh, 150vw);
+  background-color: var(--color-surface-strong);
+
+  & img {
+    object-fit: cover;
+  }
+
+  @media (width >= 48rem) {
+    height: min(100svh, 56.25vw);
+  }
+}
+
+/* Bottom gradient so overlaid text stays legible on any image. */
+@utility scrim {
+  background-image: linear-gradient(
+    to top,
+    rgb(0 0 0 / 0.4),
+    rgb(0 0 0 / 0) 55%
+  );
+}
+
+/* ==========================================================================
+   Typography primitives
+   ========================================================================== */
+
+/* Section / module heading: small, bold, uppercase, tight. */
+@utility heading {
+  font-size: var(--text-title);
+  line-height: var(--text-title--line-height);
+  font-weight: 700;
+  letter-spacing: var(--tracking-tight);
+  text-transform: uppercase;
+}
+
+/* Page title (category, product name on detail page): larger, medium
+   weight, still uppercase and tight. */
+@utility heading-lg {
+  font-size: clamp(1.25rem, 1.1rem + 0.5vw, 1.5rem);
+  line-height: 1.33;
+  font-weight: 500;
+  letter-spacing: var(--tracking-tight);
+  text-transform: uppercase;
+}
+
+/* Large editorial text: light weight, sentence case. Pair with a
+   text-display-* size (defaults to md). */
+@utility display {
+  font-size: var(--text-display-md);
+  line-height: var(--text-display-md--line-height);
+  font-weight: 300;
+  letter-spacing: var(--tracking-tighter);
+}
+
+/* Small uppercase label: nav items, eyebrows, tags. */
+@utility label {
+  font-size: var(--text-caption);
+  line-height: var(--text-caption--line-height);
+  font-weight: 500;
+  letter-spacing: var(--tracking-tight);
+  text-transform: uppercase;
+}
+
+/* Product name / price at the foot of a product-tile: name regular (up to
+   two lines), price medium on its own line. */
+@utility product-meta {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  margin-top: auto;
+  font-size: var(--text-caption);
+  line-height: var(--text-caption--line-height);
+  font-weight: 400;
+  letter-spacing: var(--tracking-tight);
+  color: var(--color-ink);
+
+  & > :first-child {
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 2;
+    overflow: hidden;
+  }
+
+  & > :last-child {
+    font-weight: 500;
+  }
+}
+
+/* ==========================================================================
+   Product detail — large gallery beside a sticky information panel.
+   <div class="layout-pdp">
+     <div class="gallery"><div class="media-gallery">…</div>…</div>
+     <div class="pdp-panel">…</div>
+   </div>
+   ========================================================================== */
+
+/* Stacked on mobile; from md the gallery takes ~60% and the panel the rest. */
+@utility layout-pdp {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+
+  @media (width >= 48rem) {
+    grid-template-columns: minmax(0, 7fr) minmax(0, 5fr);
+  }
+
+  @media (width >= 80rem) {
+    grid-template-columns: minmax(0, 2fr) minmax(0, 1fr);
+  }
+}
+
+/* Mobile: full-width swipeable carousel with snap. md: one image per row,
+   stacked. xl: lead image full width, the rest in pairs. 1px seams like
+   the product grid. */
+@utility gallery {
+  display: flex;
+  gap: 1px;
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+  overscroll-behavior-x: contain;
+  scrollbar-width: none;
+
+  &::-webkit-scrollbar {
+    display: none;
+  }
+
+  & > * {
+    flex: 0 0 100%;
+    scroll-snap-align: start;
+  }
+
+  @media (width >= 48rem) {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    overflow: visible;
+  }
+
+  @media (width >= 80rem) {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+
+    & > :first-child {
+      grid-column: 1 / -1;
+    }
+  }
+}
+
+/* A gallery frame: tinted 3:4 well with the packshot contained, matching
+   the listing tiles. Pair with next/image fill. */
+@utility media-gallery {
+  position: relative;
+  overflow: hidden;
+  aspect-ratio: 3 / 4;
+  background-color: var(--color-surface);
+
+  & img {
+    object-fit: contain;
+  }
+
+  &[data-fit="cover"] img {
+    object-fit: cover;
+  }
+}
+
+/* Information column: gutter padding; sticks below the header from md so it
+   stays in view while the gallery scrolls. */
+@utility pdp-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  padding: 2rem var(--gutter) 3rem;
+
+  @media (width >= 48rem) {
+    position: sticky;
+    top: var(--header-height);
+    align-self: start;
+    padding-inline: clamp(1.5rem, 4vw, 4rem);
+    padding-top: 3rem;
+  }
+}
+
+/* Availability: coloured dot + caption. data-state = in | low | out. */
+@utility stock-status {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: var(--text-caption);
+  line-height: var(--text-caption--line-height);
+  letter-spacing: var(--tracking-tight);
+
+  &::before {
+    content: "";
+    width: 0.375rem;
+    height: 0.375rem;
+    border-radius: 9999px;
+    background-color: var(--color-success);
+  }
+
+  &[data-state="low"]::before {
+    background-color: var(--color-sale);
+  }
+
+  &[data-state="out"] {
+    color: var(--color-muted);
+  }
+
+  &[data-state="out"]::before {
+    background-color: var(--color-subtle);
+  }
+}
+
+/* Native <details> disclosure with hairline rules and a +/− marker. Stack
+   several; the last one should add border-b. */
+@utility disclosure {
+  border-top: 1px solid var(--color-line);
+
+  & > summary {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    min-height: 3.5rem;
+    cursor: pointer;
+    list-style: none;
+    font-size: var(--text-caption);
+    line-height: var(--text-caption--line-height);
+    font-weight: 700;
+    letter-spacing: var(--tracking-tight);
+    text-transform: uppercase;
+  }
+
+  & > summary::-webkit-details-marker {
+    display: none;
+  }
+
+  & > summary::after {
+    content: "+";
+    font-size: var(--text-lead);
+    font-weight: 300;
+  }
+
+  &[open] > summary::after {
+    content: "−";
+  }
+
+  & > :not(summary) {
+    padding-bottom: 1.5rem;
+    color: var(--color-muted);
+  }
+}
+
+/* ==========================================================================
+   Buttons — square, 1px border, 48px tall, small bold uppercase label at
+   normal tracking. Usage: class="btn btn-primary" (+ btn-sm, btn-block).
+   ========================================================================== */
+
+@utility btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  min-height: 3rem;
+  padding-inline: 1.5rem;
+  border: 1px solid transparent;
+  border-radius: 0;
+  font-family: var(--font-sans);
+  font-size: var(--text-caption);
+  line-height: 1;
+  font-weight: 700;
+  letter-spacing: normal;
+  text-transform: uppercase;
+  white-space: nowrap;
+  cursor: pointer;
+  user-select: none;
+  transition-property: color, background-color, border-color, opacity;
+  transition-duration: 200ms;
+  transition-timing-function: var(--ease-standard);
+
+  &:disabled,
+  &[aria-disabled="true"] {
+    cursor: not-allowed;
+    opacity: 0.4;
+    pointer-events: none;
+  }
+}
+
+@utility btn-sm {
+  min-height: 2.5rem;
+  padding-inline: 1rem;
+}
+
+/* Full-width — the default for primary actions on mobile (md:w-auto to undo). */
+@utility btn-block {
+  width: 100%;
+}
+
+/* Filled ink — the one primary action per view (e.g. add to bag). */
+@utility btn-primary {
+  background-color: var(--color-ink);
+  border-color: var(--color-ink);
+  color: var(--color-white);
+
+  &:hover {
+    background-color: var(--color-ink-soft);
+    border-color: var(--color-ink-soft);
+  }
+}
+
+/* Outlined — secondary actions; inverts on hover. */
+@utility btn-secondary {
+  background-color: transparent;
+  border-color: var(--color-ink);
+  color: var(--color-ink);
+
+  &:hover {
+    background-color: var(--color-ink);
+    color: var(--color-white);
+  }
+}
+
+/* Outlined white — for use over imagery. */
+@utility btn-inverse {
+  background-color: transparent;
+  border-color: var(--color-white);
+  color: var(--color-white);
+
+  &:hover {
+    background-color: var(--color-white);
+    color: var(--color-ink);
+  }
+}
+
+/* Square icon-only control (search, account, bag, menu): 44px tap target. */
+@utility btn-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.75rem;
+  height: 2.75rem;
+  color: inherit;
+  cursor: pointer;
+  transition: opacity 200ms var(--ease-standard);
+
+  &:hover {
+    opacity: 0.6;
+  }
+}
+
+/* ==========================================================================
+   Links
+   ========================================================================== */
+
+/* Inline/body link: thin underline that fades on hover. */
+@utility link {
+  text-decoration-line: underline;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 0.25em;
+  text-decoration-color: currentColor;
+  transition: text-decoration-color 200ms var(--ease-standard);
+
+  &:hover {
+    text-decoration-color: transparent;
+  }
+}
+
+/* Navigation/quiet link: no underline until hover. */
+@utility link-quiet {
+  text-decoration-line: underline;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 0.25em;
+  text-decoration-color: transparent;
+  transition: text-decoration-color 200ms var(--ease-standard);
+
+  &:hover {
+    text-decoration-color: currentColor;
+  }
+}
+
+/* Text call-to-action: uppercase label with a persistent underline. */
+@utility link-cta {
+  font-size: var(--text-caption);
+  line-height: var(--text-caption--line-height);
+  font-weight: 600;
+  letter-spacing: var(--tracking-tight);
+  text-transform: uppercase;
+  text-decoration-line: underline;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 0.4em;
+  transition: opacity 200ms var(--ease-standard);
+
+  &:hover {
+    opacity: 0.6;
+  }
+}
