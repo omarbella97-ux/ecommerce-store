@@ -14,8 +14,24 @@ import {
 
 // On the home page the header floats transparent over the hero, then turns
 // solid and pins to the top once the page scrolls. Elsewhere it is solid.
-export function SiteHeader() {
-  const isHome = usePathname() === "/";
+// `bagCount` is a server-rendered slot (see BagCount in layout.tsx), so the
+// header itself stays static and cookie-free.
+//
+// Reading the pathname suspends while Next.js prerenders routes whose params
+// aren't known at build time (e.g. /account/orders/[reference]), so the
+// layout wraps SiteHeader in <Suspense> with <SiteHeaderView isHome={false}>
+// as the fallback — the same solid header those pages show anyway.
+export function SiteHeader({ bagCount }: { bagCount?: React.ReactNode }) {
+  return <SiteHeaderView isHome={usePathname() === "/"} bagCount={bagCount} />;
+}
+
+export function SiteHeaderView({
+  isHome,
+  bagCount,
+}: {
+  isHome: boolean;
+  bagCount?: React.ReactNode;
+}) {
   const [scrolled, setScrolled] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
 
@@ -44,9 +60,9 @@ export function SiteHeader() {
 
       <header className="header-bar" data-state={state}>
         <div className="flex items-center">
-          <button type="button" className="btn-icon" aria-label="Search">
+          <Link href="/search" className="btn-icon" aria-label="Search">
             <SearchIcon />
-          </button>
+          </Link>
         </div>
 
         <Link href="/" className="heading-lg tracking-tighter">
@@ -54,16 +70,18 @@ export function SiteHeader() {
         </Link>
 
         <div className="flex items-center justify-end">
-          <button
-            type="button"
+          <Link
+            href="/account"
             className="btn-icon max-md:hidden"
             aria-label="Account"
           >
             <AccountIcon />
-          </button>
-          <button type="button" className="btn-icon" aria-label="Shopping bag">
+          </Link>
+          <Link href="/cart" className="btn-icon w-auto min-w-11 gap-1 px-1">
             <BagIcon />
-          </button>
+            <span className="sr-only">Shopping bag</span>
+            {bagCount}
+          </Link>
           <button
             type="button"
             className="btn-icon w-auto gap-2 pl-2"
@@ -103,17 +121,27 @@ export function SiteHeader() {
             </div>
             <ul className="flex flex-col gap-3 px-gutter pt-6">
               {categories.map((category) => (
-                <li key={category}>
-                  <a href="#" className="display text-display-sm link-quiet">
-                    {category}
-                  </a>
+                <li key={category.name}>
+                  {/* The header persists across navigation, so close the
+                      menu when a link is followed. */}
+                  <Link
+                    href={category.href}
+                    className="display text-display-sm link-quiet"
+                    onClick={() => setMenuOpen(false)}
+                  >
+                    {category.name}
+                  </Link>
                 </li>
               ))}
             </ul>
             <div className="mt-auto flex flex-col gap-3 border-t px-gutter py-8">
-              <a href="#" className="link-quiet">
+              <Link
+                href="/account"
+                className="link-quiet"
+                onClick={() => setMenuOpen(false)}
+              >
                 My account
-              </a>
+              </Link>
               <a href="#" className="link-quiet">
                 Client services
               </a>

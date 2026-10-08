@@ -1,13 +1,24 @@
+import Link from "next/link";
 import { categories, site } from "@/lib/site";
+
+// Links to pages that don't exist yet.
+const placeholders = (names: string[]) =>
+  names.map((name) => ({ name, href: "#" }));
 
 const columns = [
   { title: "Shop", links: categories },
   {
     title: "Client services",
-    links: ["Contact us", "Shipping", "Returns", "Care guide", "FAQ"],
+    links: placeholders(["Contact us", "Shipping", "Returns", "Care guide", "FAQ"]),
   },
-  { title: "The house", links: ["About", "Stores", "Careers", "Sustainability"] },
-  { title: "Legal", links: ["Terms", "Privacy", "Cookies", "Accessibility"] },
+  {
+    title: "The house",
+    links: placeholders(["About", "Stores", "Careers", "Sustainability"]),
+  },
+  {
+    title: "Legal",
+    links: placeholders(["Terms", "Privacy", "Cookies", "Accessibility"]),
+  },
 ];
 
 export function SiteFooter() {
@@ -19,10 +30,10 @@ export function SiteFooter() {
             <h2 className="label mb-4">{column.title}</h2>
             <ul className="flex flex-col gap-2 text-caption text-muted">
               {column.links.map((link) => (
-                <li key={link}>
-                  <a href="#" className="link-quiet hover:text-ink">
-                    {link}
-                  </a>
+                <li key={link.name}>
+                  <Link href={link.href} className="link-quiet hover:text-ink">
+                    {link.name}
+                  </Link>
                 </li>
               ))}
             </ul>

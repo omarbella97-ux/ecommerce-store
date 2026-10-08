@@ -3,6 +3,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { Suspense } from "react";
 import { notFound } from "next/navigation";
+import { AddToBag } from "@/components/add-to-bag";
 import { ProductTile } from "@/components/product-tile";
 import {
   formatPrice,
@@ -89,7 +90,14 @@ async function ProductDetail({
                 </Link>
               </li>
               <li aria-hidden="true">/</li>
-              <li className="text-ink">{product.category.name}</li>
+              <li>
+                <Link
+                  href={`/categories/${product.category.slug}`}
+                  className="link-quiet text-ink"
+                >
+                  {product.category.name}
+                </Link>
+              </li>
             </ol>
           </nav>
 
@@ -112,19 +120,7 @@ async function ProductDetail({
           </dl>
 
           <div className="flex flex-col gap-3">
-            {/* Not wired to a cart yet. */}
-            <button
-              type="button"
-              className="btn btn-primary btn-block"
-              disabled={state === "out"}
-            >
-              {state === "out" ? "Out of stock" : "Add to bag"}
-            </button>
-            {state === "out" && (
-              <button type="button" className="btn btn-secondary btn-block">
-                Notify me when available
-              </button>
-            )}
+            <AddToBag slug={product.slug} soldOut={state === "out"} />
             <p className="text-center text-caption text-muted">
               Complimentary delivery and returns
             </p>

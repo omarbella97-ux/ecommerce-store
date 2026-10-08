@@ -1,6 +1,7 @@
 import Image from "next/image";
+import Link from "next/link";
 import { ProductTile } from "@/components/product-tile";
-import { getProducts } from "@/lib/products";
+import { getNewArrivals } from "@/lib/products";
 
 // Temporary stock photography from Unsplash (Unsplash License).
 const hero = {
@@ -24,7 +25,7 @@ const stories = [
 ];
 
 export default async function Home() {
-  const newIn = await getProducts({ limit: 4 });
+  const newIn = await getNewArrivals({ limit: 4 });
 
   return (
     <main>
@@ -52,9 +53,9 @@ export default async function Home() {
       <section className="pt-12 md:pt-16">
         <div className="mb-6 flex flex-col items-center gap-2 px-gutter text-center">
           <h2 className="heading">New this week</h2>
-          <a href="#" className="link-cta">
+          <Link href="/new-arrivals" className="link-cta">
             Shop all
-          </a>
+          </Link>
         </div>
         <ul className="grid-products">
           {newIn.map((product) => (

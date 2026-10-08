@@ -3,13 +3,20 @@ import Link from "next/link";
 import { formatPrice, stockState, type Product } from "@/lib/products";
 
 // Listing card used everywhere products appear in a grid-products row.
+// Low and sold-out stock replace the tag in the eyebrow (data-stock styles it).
 export function ProductTile({ product }: { product: Product }) {
-  const soldOut = stockState(product) === "out";
+  const state = stockState(product);
   const [image] = product.images;
 
   return (
-    <Link href={`/products/${product.slug}`} className="product-tile h-full">
-      <p className="product-eyebrow">{soldOut ? "Out of stock" : product.tag}</p>
+    <Link
+      href={`/products/${product.slug}`}
+      className="product-tile h-full"
+      data-stock={state === "in" ? undefined : state}
+    >
+      <p className="product-eyebrow">
+        {state === "out" ? "Out of stock" : state === "low" ? "Low stock" : product.tag}
+      </p>
       <div className="media-product" data-fit={product.imageFit}>
         {image ? (
           <Image
